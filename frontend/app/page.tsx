@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import styles from './page.module.css';
 
 interface Task {
   id: number;
@@ -10,6 +11,28 @@ interface Task {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-6206.up.railway.app';
+
+function statusBadgeClass(status: string): string {
+  switch (status) {
+    case 'completed':
+      return styles.badgeCompleted;
+    case 'in-progress':
+      return styles.badgeProgress;
+    default:
+      return styles.badgePending;
+  }
+}
+
+function statusLabel(status: string): string {
+  switch (status) {
+    case 'completed':
+      return 'Done';
+    case 'in-progress':
+      return 'In Progress';
+    default:
+      return 'Pending';
+  }
+}
 
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -80,57 +103,66 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📋 Task Manager</h1>
-      <p style={{ color: '#666', marginBottom: '2rem' }}>
-        API: {API_URL}
-      </p>
+    <div className={styles.container}>
+      {/* Header */}
+      <header className={styles.header}>
+        <h1>
+          <span className={styles.emoji}>📋</span> Task Manager
+        </h1>
+        <p className={styles.subtitle}>Organize and track your tasks</p>
+      </header>
 
+      {/* Error banner */}
       {error && (
-        <div style={{ padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '8px', marginBottom: '1rem' }}>
-          {error}
-        </div>
+        <div className={styles.errorBanner}>⚠ {error}</div>
       )}
 
-      <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+      {/* Create form */}
+      <form onSubmit={handleCreate} className={styles.createForm}>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="New task title..."
-          style={{ flex: 1, padding: '0.75rem', fontSize: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}
+          placeholder="What needs to be done?"
+          className={styles.input}
         />
-        <button type="submit" style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', background: '#0070f3', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-          Add Task
+        <button type="submit" className={styles.addButton}>
+          + Add Task
         </button>
       </form>
 
+      {/* Task list */}
       {loading ? (
-        <p>Loading tasks...</p>
+        <p className={styles.loadingState}>Loading tasks…</p>
       ) : tasks.length === 0 ? (
-        <p style={{ color: '#888' }}>No tasks yet. Create one above!</p>
+        <p className={styles.emptyState}>No tasks yet — add one above!</p>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className={styles.taskList}>
           {tasks.map((task) => (
-            <li key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', marginBottom: '0.5rem', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #eee' }}>
-              <span style={{ flex: 1 }}>
-                <strong>{task.title}</strong>
-                <span style={{ marginLeft: '0.5rem', padding: '0.2rem 0.6rem', fontSize: '0.75rem', background: task.status === 'completed' ? '#d4edda' : task.status === 'in-progress' ? '#fff3cd' : '#e2e3e5', borderRadius: '4px', textTransform: 'uppercase' }}>
-                  {task.status}
+            <li key={task.id} className={styles.taskCard}>
+              <div className={styles.taskInfo}>
+                <span className={styles.taskTitle}>{task.title}</span>
+                <span className={`${styles.badge} ${statusBadgeClass(task.status)}`}>
+                  {statusLabel(task.status)}
                 </span>
-              </span>
-              <select
-                value={task.status}
-                onChange={(e) => handleStatusChange(task.id, e.target.value)}
-                style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid #ddd' }}
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-              <button onClick={() => handleDelete(task.id)} style={{ padding: '0.4rem 0.8rem', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                Delete
-              </button>
+              </div>
+              <div className={styles.taskActions}>
+                <select
+                  value={task.status}
+                  onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                  className={styles.statusSelect}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                </select>
+                <button
+                  onClick={() => handleDelete(task.id)}
+                  className={styles.deleteButton}
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
