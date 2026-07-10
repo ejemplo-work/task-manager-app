@@ -2,6 +2,9 @@
 
 Full-stack task management application with Express + TypeScript backend and Next.js frontend.
 
+### Styling
+The frontend uses **CSS Modules** (`page.module.css`) with CSS custom properties (variables) defined in `globals.css`. Font: **Inter** (Google Fonts). The design supports both light and dark modes via `prefers-color-scheme`, and is responsive down to 600px viewport width.
+
 ## Architecture
 
 ```
